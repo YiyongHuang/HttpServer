@@ -38,9 +38,8 @@ private:
     static std::vector<ThreadPoolTask> queue;
     static int thread_count;
     static int queue_size;
-    static int head;
-    // tail 指向尾节点的下一节点
-    static int tail;
+    static int head;  // 队头
+    static int tail;  // 队尾
     static int count;
     static int shutdown;
     static int started;
