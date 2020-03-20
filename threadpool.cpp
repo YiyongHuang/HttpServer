@@ -33,7 +33,6 @@ int ThreadPool::threadpool_create(int _thread_count, int _queue_size)
     {
         if (pthread_create(&threads[i], NULL, threadpool_worker, (void *)(0)) != 0)
         {
-            threadpool_destroy(pool, 0);
             return -1;
         }
         ++thread_count;
