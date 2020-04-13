@@ -4,5 +4,7 @@
 * 线程池处理请求
 
 ## Usage
-```make
-./myserver -p port -t threadnum```
+```
+make
+./myserver -p port -t threadnum
+```
