@@ -1,2 +1,1 @@
-# 简易 C++ WebServer
-## 仅支持短连接，没有计时器保持长连接。
+# C++ WebServer
