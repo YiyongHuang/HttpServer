@@ -12,13 +12,8 @@ int ThreadPool::count = 0;
 int ThreadPool::shutdown = 0;
 int ThreadPool::started = 0;
 
-void myHandler(std::shared_ptr<void> req)
-{
-    std::shared_ptr<HttpRequest> request = std::static_pointer_cast<HttpRequest>(req);
-    request->handleRequest();
-}
-
-int ThreadPool::threadpool_create(int _thread_count, int _queue_size)
+// 创建线程池，初始化线程
+int ThreadPool::threadpoolCreate(int _thread_count, int _queue_size)
 {
     do
     {
@@ -34,7 +29,7 @@ int ThreadPool::threadpool_create(int _thread_count, int _queue_size)
         // 创建线程
         for (int i = 0; i < _thread_count; ++i)
         {
-            if (pthread_create(&threads[i], NULL, threadpool_thread, (void *)(0)) != 0)
+            if (pthread_create(&threads[i], NULL, threadpoolWorker, (void *)(0)) != 0)
             {
                 return -1;
             }
@@ -46,7 +41,7 @@ int ThreadPool::threadpool_create(int _thread_count, int _queue_size)
     return 0;
 }
 
-int ThreadPool::threadpool_add(std::shared_ptr<void> args, std::function<void(std::shared_ptr<void>)> fun)
+int ThreadPool::threadpoolAdd(std::shared_ptr<void> args, std::function<void(std::shared_ptr<void>)> fun)
 {
     int next, err = 0;
     if (pthread_mutex_lock(&lock) != 0)
@@ -71,7 +66,6 @@ int ThreadPool::threadpool_add(std::shared_ptr<void> args, std::function<void(st
         tail = next;
         ++count;
 
-        /* pthread_cond_broadcast */
         if (pthread_cond_signal(&notify) != 0)
         {
             err = THREADPOOL_SIGNAL_FAILURE;
@@ -84,9 +78,9 @@ int ThreadPool::threadpool_add(std::shared_ptr<void> args, std::function<void(st
     return err;
 }
 
-int ThreadPool::threadpool_destroy(ShutDownOption shutdown_option)
+int ThreadPool::threadpoolDestroy(ShutDownOption shutdown_option)
 {
-    printf("Thread pool destroy !\n");
+    std::cout<<"Thread pool destroy !"<<std::endl;
     int i, err = 0;
 
     if (pthread_mutex_lock(&lock) != 0)
@@ -120,12 +114,12 @@ int ThreadPool::threadpool_destroy(ShutDownOption shutdown_option)
 
     if (!err)
     {
-        threadpool_free();
+        threadpoolFree();
     }
     return err;
 }
 
-int ThreadPool::threadpool_free()
+int ThreadPool::threadpoolFree()
 {
     if (started > 0)
         return -1;
@@ -135,7 +129,7 @@ int ThreadPool::threadpool_free()
     return 0;
 }
 
-void *ThreadPool::threadpool_thread(void *args)
+void *ThreadPool::threadpoolWorker(void *args)
 {
     while (true)
     {
@@ -161,7 +155,7 @@ void *ThreadPool::threadpool_thread(void *args)
     }
     --started;
     pthread_mutex_unlock(&lock);
-    printf("This threadpool thread finishs!\n");
+    std::cout<<"This threadpool thread finishs!"<<std::endl;
     pthread_exit(NULL);
     return (NULL);
 }
