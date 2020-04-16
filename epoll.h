@@ -14,20 +14,22 @@
 
 class HttpRequest;
 
+void myHandler(std::shared_ptr<void> request);
+
 class Epoll
 {
 private:
     static int epoll_fd_;
     static struct epoll_event *events_;
-    static std::unordered_map<int, std::shared_ptr<HttpRequest>> fd2req;
+    static std::unordered_map<int, std::shared_ptr<HttpRequest>> fd2req_;
 
 public:
-    static int epoll_init(int flags);
-    static int epoll_add(int fd, std::shared_ptr<HttpRequest> request, int events);
-    static int epoll_mod(int fd, std::shared_ptr<HttpRequest> request, int events);
-    static int epoll_del(int fd, int events);
-    static int eopll_wait_(int listen_fd, int max_events, int timeout);
+    static int epollInit(int flags);
+    static int epollAdd(int fd, std::shared_ptr<HttpRequest> request, int events);
+    static int epollMod(int fd, std::shared_ptr<HttpRequest> request, int events);
+    static int epollDel(int fd, int events);
+    static int eopllWait(int listen_fd, int max_events, int timeout);
     static std::vector<std::shared_ptr<HttpRequest>> getEventsRequest(int listen_fd, int events_num);
     static void acceptConnection(int listen_fd);
-    static void handle_events(int listen_fd, int events_count);
+    static void handleEvents(int listen_fd, int events_count);
 };
