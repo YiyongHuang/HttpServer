@@ -29,17 +29,19 @@ int main(int argc, char *argv[])
             break;
         }
     }
+    // 设置SIGPIPE信号默认处理函数为SIG_IGN，避免客户端意外断开连接时内核发给程序的SIGPIPE信号使程序关闭
+    // SIGPIPE默认处理为退出进程
     handleSigpipe();
-    HttpRequest::http_request_init();
-    if (Epoll::epoll_init(0) < 0)
+    // 初始化HTTP文件类型
+    HttpRequest::httpRequestInit();
+    if (Epoll::epollInit(0) < 0)
     {
         std::cout << "Epoll create failed" << std::endl;
         return 1;
     }
-    if (ThreadPool::threadpool_create(threadNum, QUEUE_SIZE) < 0)
+    if (ThreadPool::threadpoolCreate(threadNum, QUEUE_SIZE) < 0)
     {
-        std::cout << "Threadpool create failed\n"
-                  << std::endl;
+        std::cout << "Threadpool create failed" << std::endl;
         return 1;
     }
     int listen_fd = socketBindListen(port);
@@ -51,17 +53,18 @@ int main(int argc, char *argv[])
         return 1;
     }
     std::shared_ptr<HttpRequest> request(new HttpRequest(listen_fd));
-    if (Epoll::epoll_add(listen_fd, request, EPOLLIN | EPOLLET) < 0)
+    if (Epoll::epollAdd(listen_fd, request, EPOLLIN | EPOLLET) < 0)
     {
         return 1;
     }
     while (true)
     {
-        int event_count = Epoll::eopll_wait_(listen_fd, MAX_EVENTS, -1);
+        int event_count = Epoll::eopllWait(listen_fd, MAX_EVENTS, -1);
         // std::cout<<event_count;
         if (event_count > 0)
-            Epoll::handle_events(listen_fd, event_count);
+            Epoll::handleEvents(listen_fd, event_count);
         TimerMananger::handleExpiredEvents();
     }
+    ThreadPool::threadpoolDestroy();
     return 0;
 }
