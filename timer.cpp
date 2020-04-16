@@ -1,6 +1,6 @@
 #include "timer.h"
 
-pthread_mutex_t TimerMananger::timerLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t TimerMananger::timerLock_ = PTHREAD_MUTEX_INITIALIZER;
 std::priority_queue<std::shared_ptr<TimerNode>, std::deque<std::shared_ptr<TimerNode>>, cmpExpTime> TimerMananger::timerQueue_;
 
 TimerNode::TimerNode(std::shared_ptr<HttpRequest> request, int timeout)
@@ -38,7 +38,7 @@ TimerNode::~TimerNode()
   // std::cout << "~timernode" << std::endl;
   if (request_)
   {
-    Epoll::epoll_del(request_->getFd(), (EPOLLIN | EPOLLET | EPOLLONESHOT));
+    Epoll::epollDel(request_->getFd(), (EPOLLIN | EPOLLET | EPOLLONESHOT));
   }
 }
 
@@ -46,14 +46,15 @@ void TimerMananger::addTimer(std::shared_ptr<HttpRequest> request, int timeout)
 {
   std::shared_ptr<TimerNode> new_timer(new TimerNode(request, timeout));
   request->setTimer(new_timer);
-  pthread_mutex_lock(&timerLock);
+  pthread_mutex_lock(&timerLock_);
   timerQueue_.push(new_timer);
-  pthread_mutex_unlock(&timerLock);
+  pthread_mutex_unlock(&timerLock_);
 }
 
+// 删除被分离的和超时计时器
 void TimerMananger::handleExpiredEvents()
 {
-  pthread_mutex_lock(&timerLock);
+  pthread_mutex_lock(&timerLock_);
   // std::cout << "timerqueue size = " << timerQueue_.size() << std::endl;
   while (!timerQueue_.empty())
   {
@@ -65,5 +66,5 @@ void TimerMananger::handleExpiredEvents()
     else
       break;
   }
-  pthread_mutex_unlock(&timerLock);
+  pthread_mutex_unlock(&timerLock_);
 }
