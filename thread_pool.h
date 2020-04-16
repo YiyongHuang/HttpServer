@@ -30,7 +30,6 @@ struct ThreadPoolTask
     std::shared_ptr<void> args;
 };
 
-void myHandler(std::shared_ptr<void> req);
 
 class ThreadPool
 {
@@ -49,10 +48,9 @@ private:
     static int started;
 
 public:
-    static int threadpool_create(int _thread_count, int _queue_size);
-    static int threadpool_add(std::shared_ptr<void> args, std::function<void(std::shared_ptr<void>)> fun = myHandler);
-    // static int threadpool_add(std::shared_ptr<void> args, std::function<void(std::shared_ptr<void>)> fun);
-    static int threadpool_destroy(ShutDownOption shutdown_option = graceful_shutdown);
-    static int threadpool_free();
-    static void *threadpool_thread(void *args);
+    static int threadpoolCreate(int _thread_count, int _queue_size);
+    static int threadpoolAdd(std::shared_ptr<void> args, std::function<void(std::shared_ptr<void>)> fun);
+    static int threadpoolDestroy(ShutDownOption shutdown_option = graceful_shutdown);
+    static int threadpoolFree();
+    static void *threadpoolWorker(void *args);
 };
