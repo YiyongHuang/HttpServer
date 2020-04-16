@@ -4,7 +4,7 @@ using namespace std;
 
 std::unordered_map<std::string, std::string> HttpRequest::mime_;
 
-void HttpRequest::http_request_init()
+void HttpRequest::httpRequestInit()
 {
     mime_[".html"] = "text/html";
     mime_[".avi"] = "video/x-msvideo";
@@ -231,6 +231,16 @@ ResponseState HttpRequest::responseRequest()
             header += "Connection: keep-alive\r\n";
             header += "Keep-Alive: timeout=" + to_string(TIMER_TIMEOUT) + "\r\n";
         }
+        if (method_ == METHOD_HEAD)
+        {
+            outBuffer_ += header + "\r\n";
+            if (writen(fd_, outBuffer_) < 0)
+            {
+                perror("Send head failed");
+                return RESPONSE_ERROR;
+            }
+            return RESPONSE_SUCCESS;
+        }
         int dot_pos = fileName_.find('.');
         string filetype;
         if (dot_pos < 0)
@@ -251,8 +261,6 @@ ResponseState HttpRequest::responseRequest()
         header += "Content-Length: " + to_string(statbuff.st_size) + "\r\n";
         header += "\r\n";
         outBuffer_ += header;
-        if (method_ == METHOD_HEAD)
-            return RESPONSE_SUCCESS;
         // ssize_t send_len;
         // if (send_len != strlen(header))
         // {
@@ -306,6 +314,7 @@ void HttpRequest::handleError(int error_no, std::string msg)
     writen(fd_, body_buff);
 }
 
+// 保持长连接时只需要每次将请求重置，再用于接收下一个请求，避免了创建和销毁的开销
 void HttpRequest::resetRequest()
 {
     inBuffer_.clear();
@@ -396,10 +405,10 @@ void HttpRequest::handleRequest()
         else
             return;
     }
-    // 添加新的计数器
+    // 给该请求重新添加计时器
     // std::cout<<"add new timer"<<std::endl;
     TimerMananger::addTimer(shared_from_this(), TIMER_TIMEOUT);
-    Epoll::epoll_mod(fd_, shared_from_this(), (EPOLLIN | EPOLLET | EPOLLONESHOT));
+    Epoll::epollMod(fd_, shared_from_this(), (EPOLLIN | EPOLLET | EPOLLONESHOT));
 }
 
 void HttpRequest::sepereteTimer()
@@ -416,6 +425,6 @@ void HttpRequest::sepereteTimer()
 HttpRequest::~HttpRequest()
 {
     // std::cout << "~request" << std::endl;
-    // Epoll::epoll_del(fd_, ((EPOLLIN | EPOLLET | EPOLLONESHOT)));
+    // Epoll::epollDel(fd_, ((EPOLLIN | EPOLLET | EPOLLONESHOT)));
     close(fd_);
 }
