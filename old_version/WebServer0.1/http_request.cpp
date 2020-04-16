@@ -224,6 +224,16 @@ AnalysisState HttpRequest::analysisRequest()
         header += "HTTP/1.1 200 OK\r\n";
         // char header[MAX_BUFF];
         // sprintf(header, "HTTP/1.1 %d OK\r\n", 200);
+        if (method_ == METHOD_HEAD)
+        {
+            outBuffer_ += header + "\r\n";
+            if (writen(fd_, outBuffer_) < 0)
+            {
+                perror("Send head failed");
+                return ANALYSIS_ERROR;
+            }
+            return ANALYSIS_SUCCESS;
+        }
         int dot_pos = fileName_.find('.');
         string filetype;
         if (dot_pos < 0)
@@ -244,8 +254,6 @@ AnalysisState HttpRequest::analysisRequest()
         header += "Content-Length: " + to_string(statbuff.st_size) + "\r\n";
         header += "\r\n";
         outBuffer_ += header;
-        if (method_ == METHOD_HEAD)
-            return ANALYSIS_SUCCESS;
         // ssize_t send_len;
         // if (send_len != strlen(header))
         // {
