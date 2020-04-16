@@ -73,7 +73,7 @@ class HttpRequest : public std::enable_shared_from_this<HttpRequest>
 private:
     int fd_;
     int method_;
-    size_t readTimes_;
+    size_t readTimes_;   // 读取不到数据时重复读取的次数，肯数据未到达或请求终止
     HttpVersion HttpVersion_;
     bool keep_alive_;
     std::map<std::string, std::string> headers_;
@@ -84,7 +84,7 @@ private:
     static std::unordered_map<std::string, std::string> mime_;
 
 public:
-    static void http_request_init();
+    static void httpRequestInit();
     HttpRequest(int listen_fd);
     URIState parseURI();
     HeaderState parseHeader();
