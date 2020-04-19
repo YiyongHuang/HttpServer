@@ -127,7 +127,7 @@ void Epoll::acceptConnection(int listen_fd)
         std::shared_ptr<HttpRequest> new_req(new HttpRequest(accept_fd));
         // 给请求添加计时器
         // std::cout<<"add connection timer"<<std::endl;
-        TimerMananger::addTimer(new_req, TIMER_TIMEOUT);
+        TimerManager::addTimer(new_req, TIMER_TIMEOUT);
         Epoll::epollAdd(accept_fd, new_req, (EPOLLIN | EPOLLET | EPOLLONESHOT));
     }
 }
