@@ -30,7 +30,7 @@ struct cmpExpTime
 };
 
 // 计时器管理器
-class TimerMananger
+class TimerManager
 {
 private:
     static pthread_mutex_t timerLock_;
