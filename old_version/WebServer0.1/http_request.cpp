@@ -210,7 +210,7 @@ HeaderState HttpRequest::parseHeader()
             keep_alive = true;
         return PARSE_HEADER_SUCCESS;
     }
-    return PARSE_HEADER_ERROR;
+    return PARSE_HEADER_AGAIN;
 }
 
 AnalysisState HttpRequest::analysisRequest()
