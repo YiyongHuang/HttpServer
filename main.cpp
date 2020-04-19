@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         // std::cout<<event_count;
         if (event_count > 0)
             Epoll::handleEvents(listen_fd, event_count);
-        TimerMananger::handleExpiredEvents();
+        TimerManager::handleExpiredEvents();
     }
     ThreadPool::threadpoolDestroy();
     return 0;
