@@ -1,4 +1,4 @@
-# C++ HttpServer
+# C++ Http WebServer
 
 ## Introduction
 使用C++11写的Http服务器，采用Reactor模式，可解析GET、HEAD请求，支持长连接(keep-alive)操作。
